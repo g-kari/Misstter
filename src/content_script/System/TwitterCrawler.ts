@@ -1,4 +1,4 @@
-import { postToMisskey } from './PostAPI'
+import { postToMisskey, postToBlueSky } from './PostAPI'
 import { showNotification } from '../UI/Notification'
 import { Scope } from '../UI/ScopeModal';
 import { misskeyFlagAttribute, misskeyFlagClassName } from '../UI/ImageFlagButton';
@@ -64,8 +64,9 @@ export const tweetToMisskey = async () => {
   
     const options = { cw, token, server, sensitive, scope: scope as Scope, localOnly }
     await postToMisskey(text ?? "", images, video, options);
+    await postToBlueSky(text ?? "", images, video, options);
   } catch (e) {
     console.error(e)
-    showNotification('Misskeyへの投稿に失敗しました', 'error')
+    showNotification('MisskeyまたはBlueSkyへの投稿に失敗しました', 'error')
   }
 }

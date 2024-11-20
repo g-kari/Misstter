@@ -5,8 +5,10 @@ import { Container, Typography, AppBar, Toolbar, TextField, FormControlLabel, Ch
 import { DEFAULT_INSTANCE_URL } from "../common/constants";
 
 const Popup = () => {
-  const [token, setToken] = useState<string | null>(null)
-  const [server, setServer] = useState<string | null>(DEFAULT_INSTANCE_URL);
+  const [misskeyToken, setMisskeyToken] = useState<string | null>(null)
+  const [misskeyServer, setMisskeyServer] = useState<string | null>(DEFAULT_INSTANCE_URL);
+  const [blueSkyToken, setBlueSkyToken] = useState<string | null>(null)
+  const [blueSkyServer, setBlueSkyServer] = useState<string | null>(null);
   const [cw, setCw] = useState<boolean | null>(null)
   const [sensitive, setSensitive] = useState<boolean | null>(null)
   const [showAccess, setShowAccess] = useState<boolean | null>(null)
@@ -14,9 +16,11 @@ const Popup = () => {
   const [autoTweet, setAutoTweet] = useState<boolean | null>(null)
 
   useEffect(() => {
-    browser.storage.sync.get(['misskey_token', 'misskey_server', 'misskey_cw', 'misskey_sensitive', 'misskey_access', 'misskey_show_local_only', 'misskey_auto_tweet']).then((result) => {
-      const token = result?.misskey_token; if (token) { setToken(token) }
-      const server = result?.misskey_server; if (server) { setServer(server) }
+    browser.storage.sync.get(['misskey_token', 'misskey_server', 'bluesky_token', 'bluesky_server', 'misskey_cw', 'misskey_sensitive', 'misskey_access', 'misskey_show_local_only', 'misskey_auto_tweet']).then((result) => {
+      const misskeyToken = result?.misskey_token; if (misskeyToken) { setMisskeyToken(misskeyToken) }
+      const misskeyServer = result?.misskey_server; if (misskeyServer) { setMisskeyServer(misskeyServer) }
+      const blueSkyToken = result?.bluesky_token; if (blueSkyToken) { setBlueSkyToken(blueSkyToken) }
+      const blueSkyServer = result?.bluesky_server; if (blueSkyServer) { setBlueSkyServer(blueSkyServer) }
       setCw(result?.misskey_cw)
       setSensitive(result?.misskey_sensitive)
       setShowAccess(result?.misskey_access)
@@ -25,36 +29,53 @@ const Popup = () => {
     })
   }, [])
   
-  const updateToken = (token: string) => {
-    setToken(token)
-    console.log(token)
+  const updateMisskeyToken = (token: string) => {
+    setMisskeyToken(token)
     browser.storage.sync.set({ misskey_token: token });
   }
-  const updateServer = (server: string) => {
-    setServer(server)
+
+  const updateMisskeyServer = (server: string) => {
+    setMisskeyServer(server)
     if (!server.startsWith('https://')) { server = 'https://' + server }
     if (server.endsWith('/')) { server = server.slice(0, -1) }
     browser.storage.sync.set({ misskey_server: server });
   }
+
+  const updateBlueSkyToken = (token: string) => {
+    setBlueSkyToken(token)
+    browser.storage.sync.set({ bluesky_token: token });
+  }
+
+  const updateBlueSkyServer = (server: string) => {
+    setBlueSkyServer(server)
+    if (!server.startsWith('https://')) { server = 'https://' + server }
+    if (server.endsWith('/')) { server = server.slice(0, -1) }
+    browser.storage.sync.set({ bluesky_server: server });
+  }
+
   const updateCw = (cw: boolean) => {
     setCw(cw)
     browser.storage.sync.set({ misskey_cw: cw })
   }
+
   const updateSensitive = (sensitive: boolean) => {
     setSensitive(sensitive)
     browser.storage.sync.set({ misskey_sensitive: sensitive })
   }
+
   const updateAccess = (access: boolean) => {
     setShowAccess(access)
     browser.storage.sync.set({ misskey_access: access })
   }
+
   const updateShowLocalOnly = (showLocalOnly: boolean) => {
-      setShowLocalOnly(showLocalOnly)
-      browser.storage.sync.set({misskey_show_local_only: showLocalOnly})
+    setShowLocalOnly(showLocalOnly)
+    browser.storage.sync.set({ misskey_show_local_only: showLocalOnly })
   }
+
   const updateAutoTweet = (autoTweet: boolean) => {
-      setAutoTweet(autoTweet)
-      browser.storage.sync.set({misskey_auto_tweet: autoTweet})
+    setAutoTweet(autoTweet)
+    browser.storage.sync.set({ misskey_auto_tweet: autoTweet })
   }
 
   const openDonationPage = () => {
@@ -64,6 +85,7 @@ const Popup = () => {
       "noreferrer"
     );
   };
+
   return (
     <>
       <AppBar position="static" sx={{ minWidth: 400 }}>
@@ -73,41 +95,76 @@ const Popup = () => {
       </AppBar>
 
       <Container sx={{ mt: 2, mb: 2 }}>
-
         <Typography variant="body2" sx={{ mt: 2, mb: 2, fontSize: 10 }}>
           サーバーのURLを入力してください。デフォルトではmisskey.ioが設定されています。
         </Typography>
 
         <TextField  
-          label="Server URL"
+          label="Misskey Server URL"
           placeholder={DEFAULT_INSTANCE_URL}
-          value={server}
+          value={misskeyServer}
           variant="outlined"
           fullWidth
           InputLabelProps={{ shrink: true }}
           size="small"
           sx={{ mb: 2 }}
           onChange={(e) => {
-            updateServer(e.target.value)
+            updateMisskeyServer(e.target.value)
           }}
         />
 
         <Typography variant="body2" sx={{ mt: 2, mb: 2, fontSize: 10 }}>
-          Tokenはお使いのMisskeyサーバーの 「設定 &#62; API」の画面から取得できます。
+          Misskey Tokenはお使いのMisskeyサーバーの 「設定 &#62; API」の画面から取得できます。
           投稿権限とファイルアップロード権限が必要です。(全てを許可すると自動で設定されます)
         </Typography>
 
         <TextField  
-          label="token"
+          label="Misskey Token"
           variant="outlined"
           placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
           fullWidth
           size="small"
           InputLabelProps={{ shrink: true }}
           sx={{ mb: 2 }}
-          value={token}
+          value={misskeyToken}
           onChange={(e) => {
-            updateToken(e.target.value)
+            updateMisskeyToken(e.target.value)
+          }}
+        />
+
+        <Typography variant="body2" sx={{ mt: 2, mb: 2, fontSize: 10 }}>
+          BlueSky Server URLを入力してください。
+        </Typography>
+
+        <TextField  
+          label="BlueSky Server URL"
+          placeholder="https://bsky.social"
+          value={blueSkyServer}
+          variant="outlined"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          size="small"
+          sx={{ mb: 2 }}
+          onChange={(e) => {
+            updateBlueSkyServer(e.target.value)
+          }}
+        />
+
+        <Typography variant="body2" sx={{ mt: 2, mb: 2, fontSize: 10 }}>
+          BlueSky Tokenはお使いのBlueSkyサーバーの 「設定 &#62; API」の画面から取得できます。
+        </Typography>
+
+        <TextField  
+          label="BlueSky Token"
+          variant="outlined"
+          placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          fullWidth
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          sx={{ mb: 2 }}
+          value={blueSkyToken}
+          onChange={(e) => {
+            updateBlueSkyToken(e.target.value)
           }}
         />
 
@@ -126,8 +183,7 @@ const Popup = () => {
             checked={sensitive ?? false}
             onChange={(e) => {
               updateSensitive(e.target.checked)
-            }
-            }
+            }}
           />}
           label={<Typography style={{ fontSize: 15 }}>投稿する全ての画像にNSFWを設定する。</Typography>}
         />
@@ -144,20 +200,20 @@ const Popup = () => {
 
         <FormControlLabel
           control={<Checkbox
-              checked={showLocalOnly ?? true}
-              onChange={(e) => {
-                  updateShowLocalOnly(e.target.checked)
-              }}
+            checked={showLocalOnly ?? true}
+            onChange={(e) => {
+              updateShowLocalOnly(e.target.checked)
+            }}
           />}
           label={<Typography style={{ fontSize: 15 }}>投稿の連合なし設定ボタンを表示する。</Typography>}
         />
 
         <FormControlLabel
           control={<Checkbox
-              checked={autoTweet ?? false}
-              onChange={(e) => {
-                  updateAutoTweet(e.target.checked)
-              }}
+            checked={autoTweet ?? false}
+            onChange={(e) => {
+              updateAutoTweet(e.target.checked)
+            }}
           />}
           label={<Typography style={{ fontSize: 15 }}>Misskeyへの投稿後自動的にツイートする。</Typography>}
         />
@@ -175,7 +231,6 @@ const Popup = () => {
           開発の支援をお願いします！ / Donation
         </Typography>
       </Container>
-
     </>
   );
 };

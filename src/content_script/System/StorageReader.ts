@@ -27,6 +27,30 @@ export const getServer = async () => {
   })
 }
 
+export const getBlueSkyToken = async () => {
+  return await new Promise<string>((resolve, reject) => {
+    browser.storage.sync.get(['bluesky_token']).then((result) => {
+      const token = result?.bluesky_token as string;
+      if (!token) {
+        showNotification('BlueSky Tokenが設定されていません。', 'error')
+        reject()
+      } else { resolve(token) }
+    })
+  })
+}
+
+export const getBlueSkyServer = async () => {
+  return await new Promise<string>((resolve, reject) => {
+    browser.storage.sync.get(['bluesky_server']).then((result) => {
+      let server = result?.bluesky_server ?? 'https://bsky.social';
+      if (server.endsWith('/')) {
+        server = server.slice(0, -1)
+      }
+      resolve(server)
+    })
+  })
+}
+
 export const getCW = async () => {
   return await new Promise<boolean>((resolve, reject) => {
     browser.storage.sync.get(['misskey_cw']).then((result) => {
